@@ -26,11 +26,13 @@ public class Guestions : MonoBehaviour {
         int counter = 0;
         foreach (string word in words)
         {
+            string wordtrimmed = word.Trim();
+           // Debug.Log("Sana parsessa on " + word);
 
-            if (word.Length > 3)
+            if (wordtrimmed.Length > 3)
             {
-                parsedNames.Add(word);
-                string newWord = string.Copy(word);
+                parsedNames.Add(wordtrimmed);
+                string newWord = string.Copy(wordtrimmed);
                 guestions.Add(newWord);
                 allGuestions[counter] = newWord;
                 counter++;

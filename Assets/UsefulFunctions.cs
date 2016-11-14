@@ -30,6 +30,22 @@ public class UsefulFunctions : MonoBehaviour
         Common.usefulFunctions = this;
     }
 
+    
+    public string GetMinuteHourTime()
+    {
+        string timenow = System.DateTime.Now.ToShortTimeString();
+        return timenow;
+    }
+
+    public string GetPreviousMethodName()
+    {
+        System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+        System.Diagnostics.StackFrame sf = st.GetFrame(2);
+
+        System.Reflection.MethodBase previousName = sf.GetMethod();
+        return previousName.Name;
+    }
+
     public Transform findLastParent(Transform asker)
     {
         Transform parentTransform = asker;

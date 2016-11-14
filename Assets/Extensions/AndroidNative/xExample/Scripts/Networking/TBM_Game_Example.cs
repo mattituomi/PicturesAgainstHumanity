@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+//using System.Diagnostics;
 
 public class TBM_Game_Example : AndroidNativeExampleBase {
 
@@ -31,6 +32,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
 	//private Texture defaulttexture;
 
 	void Start() {
+       // Debug_previous_method_name();
         Common.TBM_game = this;
 		playerLabel.text = "Player Disconnected";
 		defaulttexture = avatar.GetComponent<Renderer>().material.mainTexture;
@@ -69,19 +71,20 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
         GooglePlayTBM.ActionMatchInvitationAccepted += GooglePlayTBM_ActionMatchInvitationAccepted;
         GooglePlayTBM.ActionMatchCreationCanceled += ActionMatchCreationCanceled;
         GooglePlayTBM.ActionMatchInitiated += ActionMatchInitiated;
-
+        GooglePlayInvitationManager.Instance.RegisterInvitationListener();
         GooglePlayInvitationManager.ActionInvitationReceived += ActionInvitationReceived;
 
-        GooglePlayInvitationManager.Instance.RegisterInvitationListener();
         GooglePlayInvitationManager.ActionInvitationReceived += OnInvite;
     }
     private void ActionInvitationReceived(GP_Invite invitation)
     {
+        Debug_previous_method_name();
         Common.DebugPopUp("Action invitation received function when app is running");
         GooglePlayTBM.Instance.AcceptInvitation(invitation.Id);
     }
     private void OnInvite(GP_Invite invitation)
     {
+        Debug_previous_method_name();
         Common.DebugPopUp("OnInvite Function! Will soon acceptInvitation. Started OFFLINE");
         if (invitation.InvitationType != GP_InvitationType.INVITATION_TYPE_REAL_TIME)
         {
@@ -96,6 +99,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
 
     private void GooglePlayTBM_ActionMatchInvitationAccepted(string arg1, GP_TBM_MatchInitiatedResult arg2)
     {
+        Debug_previous_method_name();
         Common.DebugPopUp("Action match invitation accepted arg1 is " + arg1, " starting to deal with data");
       //  AN_PoupsProxy.showMessage("Action match invitation accepted arg1 is "+arg1, " starting to deal with data");
         DealWithMatchData(arg2.Match);
@@ -103,7 +107,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
 
     private void GooglePlayTBM_ActionMatchTurnFinished(GP_TBM_UpdateMatchResult obj)
     {
-
+        Debug_previous_method_name();
         Common.DebugPopUp("ActionMatch turn finished called ", " starting to deal with data");
         Common.DebugPopUp("Testataan onko match paikalla  match number on" + obj.Match.MatchNumber.ToString());
         DealWithMatchData(obj.Match);
@@ -111,10 +115,20 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
 
     private void ActionMatchReceivedFunction(GP_TBM_MatchReceivedResult result)
     {
+        Debug_previous_method_name();
         Common.DebugPopUp("ActionMatchReceivedFunction called, "," starting to deal with data");
         DealWithMatchData(result.Match);
     }
 
+    void Debug_previous_method_name()
+    {
+        string name=Common.usefulFunctions.GetPreviousMethodName();
+        string timenow = Common.usefulFunctions.GetMinuteHourTime();
+        //System.TimeSpan timeSpan = System.TimeSpan.FromSeconds(System.DateTime.Now);
+        //string timeText = string.Format("{0:D2}:{1:D2}:{2:D2}", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
+        TBM_Debug(name, timenow);
+        
+    }
 
 	//if UNITY_ANDROID
 	public GP_TBM_Match mMatch = null;
@@ -132,8 +146,8 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
         }
         else
         {
-         //  Common.roundInformation.ChangeGameState();
-            nextParticipantId = Common.roundInformation.GetNextPlayerID();
+           Common.roundInformation.ChangeGameState();
+            nextParticipantId = Common.roundInformation.gameData.playerIDS[Common.roundInformation.gameData.roundDeciderPID]; //Common.roundInformation.GetNextPlayerID();
         }
         // Get the next participant in the game-defined way, possibly round-robin.
         //nextParticipantId = getNextParticipantId();
@@ -164,6 +178,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
 
     void ActionMatchUpdated (GP_TBM_UpdateMatchResult result) {
         // Match Date updated
+        Debug_previous_method_name();
         unShowLoadingPopUp();
         AN_PoupsProxy.showMessage("ACTION match updated", "We got updated");
         DealWithMatchData(result.Match);
@@ -217,11 +232,13 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
     }
 
 	void ActionMatchCreationCanceled (AndroidActivityResult result) {
+        Debug_previous_method_name();
         AndroidMessage.Create("Match craetion cancelled","Cancelled");
         // Match Creation was cnaceled by user
     }
 
 	void ActionMatchInitiated (GP_TBM_MatchInitiatedResult result) {
+        Debug_previous_method_name();
         unShowLoadingPopUp();
 
         if (!result.IsSucceeded) {
@@ -250,7 +267,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
             if (id.Contains(playerIDToFind))
             {
                 // AN_PoupsProxy.showMessage("FindMyPlayerNumber in playerinformation", "found player number " + counter.ToString());
-                TBM_Deubg("FindMyPlayerNumber in TBM_Game/FindIDfromPlayerID", "found player number " + participant.id.ToString());
+                TBM_Debug("FindMyPlayerNumber in TBM_Game/FindIDfromPlayerID", "found player number " + participant.id.ToString());
                 return participant.id;
             }
             counter++;
@@ -259,7 +276,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
         return "ERROR_FindingID_Didnt_Find_ID";
     }
 
-    void TBM_Deubg(string name, string log)
+    void TBM_Debug(string name, string log)
     {
         Common.DebugLog(name, "TBM_GAME_EXAMPLE", log);
     }
@@ -268,7 +285,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
     {
         mMatch = match;
         
-        Common.DebugPopUp("Current player who is playing", "Participant info " + mMatch.PendingParticipantId);
+        Common.DebugPopUp("Dealing with match nata", "Participant info " + mMatch.PendingParticipantId);
         if (mMatch.Data != null)
         {
             
@@ -291,6 +308,9 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
         // Let the player take the first turn
         StartDoingTurn(mMatch);
         LoadAllParticipantInfoStartRoutine();
+        //SetGameStateBased on gameState
+
+        
     }
 
     void LoadAllParticipantInfoStartRoutine()
@@ -328,9 +348,9 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
             counter++;
 
             string turnStatus = mMatch.TurnStatus.ToString();
-            TBM_Deubg("tunStatus", turnStatus);
-            TBM_Deubg("LastUpdated", mMatch.LastUpdatedTimestamp.ToString());
-            TBM_Deubg("LastUpdaterID", mMatch.LastUpdaterId.ToString());
+            TBM_Debug("tunStatus", turnStatus);
+            TBM_Debug("LastUpdated", mMatch.LastUpdatedTimestamp.ToString());
+            TBM_Debug("LastUpdaterID", mMatch.LastUpdaterId.ToString());
             
         }
     }
@@ -358,6 +378,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
 
     void StartDoingTurn(GP_TBM_Match match)
     {
+        Common.gameLoader.LoadSceneBasedOnState();
         string id = FindIDfromConnectedPlayerID(match);
         Common.playerInformation.SetMyPlayerInformation(id);
         return;
@@ -410,6 +431,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
 
     private void ActionMatchDataLoadedFunction(GP_TBM_LoadMatchResult result)
     {
+        Debug_previous_method_name();
         AndroidMessage.Create("Loaded match data ", "loaad ");
         foreach (GP_Participant part in result.Match.Participants)
         {
@@ -421,6 +443,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
     public GameObject matchUI;
     private void ActionMatchesDataLoadedFunction(GP_TBM_LoadMatchesResult result)
     {
+
         AndroidMessage.Create("Loaded all matches", "will show all matches");
         bool loaded = false;
         List<GP_TBM_Match> matchDatas = new List<GP_TBM_Match>();
@@ -555,7 +578,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase {
             }
         // avatar.GetComponent<Renderer>().material.mainTexture = GooglePlayManager.Instance.player.icon; //TODO OTA POIS
         //GooglePlayManager.instance.player.id
-        TBM_Deubg("OnPlayerCOnnected", "player id " + GooglePlayManager.Instance.player.playerId.ToString());
+        TBM_Debug("OnPlayerCOnnected", "player id " + GooglePlayManager.Instance.player.playerId.ToString());
         Common.playerInformation.setGPID(GooglePlayManager.Instance.player.playerId);
     }
 

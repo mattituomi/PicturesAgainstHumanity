@@ -1,0 +1,4 @@
+Eka kysymys?;
+Toka kysymys?;
+Kolmas kysymys?;
+Neljas sisaltaa special. Se on {x} ?;

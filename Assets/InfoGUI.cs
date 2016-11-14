@@ -15,7 +15,7 @@ public class InfoGUI : MonoBehaviour {
         {
             Common.infoGUI = this;
         }
-        readyButton.interactable = false;
+     //   readyButton.interactable = false;
 	}
 
     public void SetImage(Texture2D result)

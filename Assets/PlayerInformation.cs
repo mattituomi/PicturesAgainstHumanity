@@ -102,8 +102,10 @@ public class PlayerInformation : MonoBehaviour {
     public void ReadyPressedSendImages(bool isTrue)
     {
         Common.cloudServiceMaster.AddPhotoToGallery();
-        ready = true;
+        //ready = true;
+        SetReady();
         Common.infoGUI.DisableReadyPressing();
+        Common.TBM_game.playTurn();
     }
 
     public void SetMyImage(Texture downloadedImage)

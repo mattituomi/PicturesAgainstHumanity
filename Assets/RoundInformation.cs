@@ -192,6 +192,13 @@ public class RoundInformation : MonoBehaviour {
         {
             newState = 1;
         }
+        //Skipataaan choosing guestion, koska tämä feature adataan myöhemmin
+        if (newState == 1)
+        {
+            SetNewDecider();
+            gameData.guestion = Common.gameMaster.getNextGuestion();
+            newState = 2;
+        }
         AN_PoupsProxy.showMessage("Changing game state", "new state is "+(GameStates)newState);
         gameData.gameState = newState;
         gameData.round++;
@@ -309,7 +316,7 @@ public class RoundInformation : MonoBehaviour {
             newData.matchID = matchID;
             AndroidMessage.Create("Addingthingies initializing game data", "playerIDS "+id);
         }
-        newData.gameState = (int)GameStates.ChoosingQuestions;
+        newData.gameState = 0; //(int)GameStates.ChoosingQuestions;
         gameData = newData;
         Common.playerInformation.myID = newData.hostID;
        // Common.playerInformation.playerNumber = 0;
