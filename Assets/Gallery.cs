@@ -8,6 +8,10 @@ using System.Collections.Generic;
 public class Gallery : MonoBehaviour {
     AlbumService albumService;
     PhotoService photoService;
+
+    public delegate void UpdateDelegate();
+
+    public UpdateDelegate updateDelegates;
     // Use this for initialization
     void Start () {
        // App42API.Initialize("0f8d9be1cad28cf2dd9b67c33555635f29f26992723be154a70e49083a68f952", "960640b896bf9ff26c6abbd7c854fc0dfc08ef65f56e98f5d7227015e662957b");
@@ -15,8 +19,9 @@ public class Gallery : MonoBehaviour {
         photoService = App42API.BuildPhotoService();
         Common.galleryManager=this;
     }
-	
-	void Update () {
+
+
+    void Update () {
         if (Input.GetKeyDown(KeyCode.A))
         {
             //CreateAlbum();
@@ -26,7 +31,7 @@ public class Gallery : MonoBehaviour {
     public void CreateAlbum(string userName,string albumName)
     {
         App42Log.SetDebug(true);
-        albumService.CreateAlbum(userName, albumName, description, new UnityCallBack());
+        albumService.CreateAlbum(userName, albumName, description, new AlbumCallBack());
         
     }
 
@@ -37,11 +42,11 @@ public class Gallery : MonoBehaviour {
     }
 
 
-
     public class AddPhotoCallback : App42CallBack
     {
         public void OnSuccess(object response)
         {
+            Debug.Log("Adding photo succesfull");
             Album album = (Album)response;
             App42Log.Console("userName is :" + album.GetUserName());
             App42Log.Console("albumName is :" + album.GetName());
@@ -58,10 +63,15 @@ public class Gallery : MonoBehaviour {
                 App42Log.Console("jsonResponse is :" + photoList[i].ToString());
                 Common.playerInformation.SetURL(photoList[i].GetUrl(),0);
             }
+
+            Common.cloudServiceMaster.PhotoAddWasSuccesfull();
+           // updateDelegateForPhotoAddSuccesfull();
         }
         public void OnException(Exception e)
         {
             App42Log.Console("Exception : " + e);
+            Debug.Log("Adding photo FAILED Exception is "+e);
+            Common.DebugPopUp("ADDING PHOTO FAILED error is :"+e,"Let matti know if this isnt due to network");
         }
     }
 
@@ -69,10 +79,11 @@ public class Gallery : MonoBehaviour {
     string albumName = "My Album2";
     string description = "Room album all of the pictures of the room";
   
-    class UnityCallBack : App42CallBack
+    class AlbumCallBack : App42CallBack
     {
         public void OnSuccess(object response)
         {
+            Debug.Log("Creating album was succesfull");
             Album album = (Album)response;
             App42Log.Console("userName is :" + album.GetUserName());
             App42Log.Console("albumName is :" + album.GetName());
@@ -81,6 +92,8 @@ public class Gallery : MonoBehaviour {
         }
         public void OnException(Exception e)
         {
+            Debug.Log("Creating Album was unsuccesfull On Gallery greation TODO: WHAT DO WE DO NOW? CLOSE GAME? TRY TO MAKE IT AGAIN?");
+            Common.DebugPopUp("Creating Album was unsuccesfull On Gallery greation TODO: WHAT DO WE DO NOW? CLOSE GAME? TRY TO MAKE IT AGAIN? IF U ENCOUNTER THIS LET MATTI KNOW");
             App42Log.Console("Exception : " + e);
         }
     }

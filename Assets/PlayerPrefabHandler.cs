@@ -69,7 +69,7 @@ public class PlayerPrefabHandler : MonoBehaviour {
                 Common.playerInformation.myLocalImagePath = PlayerPrefs.GetString("PickedImageLocalPath", Common.playerInformation.myCloudImagePath);
                 Common.playerInformation.ready = PlayerPrefsX.GetBool("Ready", Common.playerInformation.ready);
                 //    Common.playerInformation.myID = Common.roundInformation.gameData.playerIDS[Common.playerInformation.playerNumber];
-                Common.gameLoader.LoadGame();
+                Common.gameLoader.LoadGamePasedOnSavedData();
             }
         }
     }

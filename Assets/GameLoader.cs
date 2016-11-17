@@ -19,7 +19,7 @@ public class GameLoader : MonoBehaviour {
         ChangeUIBasedOnState(0);
     }
 
-    public void LoadGame()
+    public void LoadGamePasedOnSavedData()
     {
         Debug.Log("Starting to load game based on saved data");
         StartCoroutine(LoadGameRoutine());
@@ -43,16 +43,39 @@ public class GameLoader : MonoBehaviour {
     public GameObject ShowWinnerUI;
     public GameObject PickWinnerUI;
     public GameObject ChoosingQuestionsUI; 
+
+    //Loads the wanted scene and needed values and changes UI.
     public void LoadSceneBasedOnState()
     {
         Debug.Log("Loading level at gamestate " + Common.roundInformation.gameData.gameState.ToString());
        // loadingScene = true;
-       // Common.levelLoader.updateDelegates += this.LevelLoadUpdate;
+        //Common.levelLoader.updateDelegates += this.LevelLoadUpdate;
         //Scenen vaihdon sijaan toteutetaan että eri menu tulee näkyviin. Helpottaa siinämielessä ettei tarvitse aina vaihdella scenejä ja miettiä onko objektit kohdallaan.
         int gameState = Common.roundInformation.gameData.gameState;
         ChangeUIBasedOnState(gameState);
+        LoadNewState(gameState);
+         //ADDED  15.11.2016
         // Common.levelLoader.LoadLevel(Common.roundInformation.gameData.gameState);
 
+    }
+
+    public void printTestWhooo()
+    {
+        Debug.Log("Game loader whoooo");
+    }
+
+    int previousState = -1;
+    public void ChangeBetweenLobbyAndCurrentState()
+    {
+        if (previousState == -1)
+        {
+            ChangeUIBasedOnState(0);
+            previousState = Common.roundInformation.gameData.gameState;
+        }else
+        {
+            ChangeUIBasedOnState(Common.roundInformation.gameData.gameState);
+            previousState = -1;
+        }
     }
 
     public void ChangeUIBasedOnState(int gameState)
@@ -87,6 +110,54 @@ public class GameLoader : MonoBehaviour {
         }
     }
 
+    void LoadNewState(int gameState)
+    {
+        GameDataGooglePlay gameData = Common.roundInformation.gameData;
+        //FIrst load scene based on data
+        RoundInformation ri = Common.roundInformation;
+        PlayerInformation pi = Common.playerInformation;
+        if (gameData.AreWeOnPictureState())
+        {
+            Debug.Log("Setting new guestion");
+            Common.infoGUI.setNewGuestion(ri.gameData.guestion);
+            Debug.Log("new guestion has been set");
+            if (gameState == (int)GameStates.PickingPics)
+            {
+                Common.DebugPopUp("GameLoader loadingNewState routine","Picking pics is the game state gonna check if we are ready and preload image if it exists");
+                if (pi.ready)
+                {
+                    if (pi.myCloudImagePath.Length > 5)
+                    {
+                        Common.infoGUI.DisableReadyPressing();
+                        Debug.Log("Loading image from cloud");
+                        pi.LoadMyImageFromURL();
+                        pi.SetReady();
+                        Common.infoGUI.ChangeReadyButtonState(true);
+                    }
+                    else if (pi.myLocalImagePath.Length > 5)
+                    {
+                        Debug.Log("Loading image from local");
+                        pi.LoadMyImageFromURL(pi.myLocalImagePath);
+                        pi.ready = false;
+                    }
+                    else
+                    {
+                        pi.ready = false;
+                    }
+                }
+            }
+            if (gameData.gameState == (int)GameStates.PickingWinner)
+            {
+               // Common.showWinnerMaster.ClearPossiblePreviousElements();
+                Debug.Log("Creating picking winner scene");
+                Common.DebugPopUp("GameLoader loadinggameroutine gamestate is picking winner Gonna create elements and load all images");
+                Common.showWinnerMaster.CreateElements(Common.roundInformation.gameData.playerAmount);
+                Debug.Log("Loading all images from playuer URL");
+                Common.showWinnerMaster.LoadAllImagesFromPlayerURLS();
+            }
+        }
+        }
+
     IEnumerator LoadGameRoutine()
     {
         Debug.Log("First lets load wanted scene based on gamestate");
@@ -113,7 +184,7 @@ public class GameLoader : MonoBehaviour {
                         Debug.Log("Loading image from cloud");
                         pi.LoadMyImageFromURL();
                         pi.SetReady();
-                        Common.infoGUI.SetReadyToggle(true);
+                        Common.infoGUI.ChangeReadyButtonState(true);
                     }
                     else if (pi.myLocalImagePath.Length > 5)
                     {
@@ -130,6 +201,7 @@ public class GameLoader : MonoBehaviour {
             if (gameData.gameState == (int)GameStates.PickingWinner)
             {
                 Debug.Log("Creating picking winner scene");
+                Common.DebugPopUp("GameLoader loadinggameroutine gamestate is picking winner Gonna create elements and load all images");
                 Common.showWinnerMaster.CreateElements(Common.roundInformation.gameData.playerAmount);
                 Common.showWinnerMaster.LoadAllImagesFromPlayerURLS();
             }

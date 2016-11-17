@@ -37,7 +37,7 @@ public class GameDataGooglePlay
         PrintGD(Time.time.ToString(), "LAST UPDATED");
         PrintGD(playerAmount.ToString(), "playerAmount");
         PrintGD(hostID,"hostID");
-        PrintGD(roundImageURLs.Count.ToString(), "roundImageURLs");
+        PrintGD(ChangeStringListToString(roundImageURLs), "roundImageURLs");
         PrintGD(readyStates.Count.ToString(), "readyStates");
         PrintGD(gameStartTime, "gameStartTime");
         PrintGD(gameState.ToString(), "gameState");
@@ -52,9 +52,28 @@ public class GameDataGooglePlay
 
     }
 
+    string ChangeStringListToString(List<string> list)
+    {
+        string result ="";
+        foreach(string member in list)
+        {
+            result += "  " + member;
+        }
+        return result;
+    } 
+
     void PrintGD(string log, string name)
     {
         Common.DebugLog(name, "gameData", log);
+    }
+
+    public bool AreWeOnPictureState()
+    {
+        if(gameState != (int)GameStates.Lobby && gameState != (int)GameStates.ChoosingQuestions)
+        {
+            return true;
+        }
+        return false;
     }
 }
 public class RoundInformation : MonoBehaviour {
@@ -114,12 +133,12 @@ public class RoundInformation : MonoBehaviour {
         {
             if (id.Contains(idToFind))
             {
-                AN_PoupsProxy.showMessage("FOUND NUBMER Finding pnumber "+idToFind+ "in Roundinformation", "found number " + counter.ToString());
+              //  AN_PoupsProxy.showMessage("FOUND NUBMER Finding pnumber "+idToFind+ "in Roundinformation", "found number " + counter.ToString());
                 return counter;
             }
             counter++;
         }
-        AN_PoupsProxy.showMessage("NO NUMBER! Finding pnumber " + idToFind + "in Roundinformation", "returning 0");
+        Common.DebugPopUp("NO NUMBER! Finding pnumber " + idToFind + "in Roundinformation", "returning 0");
         return 0;
     }
 
@@ -193,13 +212,13 @@ public class RoundInformation : MonoBehaviour {
             newState = 1;
         }
         //Skipataaan choosing guestion, koska tämä feature adataan myöhemmin
-        if (newState == 1)
+        if (newState == (int)GameStates.ChoosingQuestions)
         {
             SetNewDecider();
             gameData.guestion = Common.gameMaster.getNextGuestion();
             newState = 2;
         }
-        AN_PoupsProxy.showMessage("Changing game state", "new state is "+(GameStates)newState);
+        Common.DebugPopUp("Changing game state", "new state is "+(GameStates)newState);
         gameData.gameState = newState;
         gameData.round++;
         
@@ -264,7 +283,7 @@ public class RoundInformation : MonoBehaviour {
         foreach(bool isReady in gameData.readyStates)
         {
           //  AN_PoupsProxy.showMessage("GameState on GetNextPlayerID", "count "+counter.ToString()+" state: "+isReady.ToString());
-            Common.DebugPopUp("GameState on GetNextPlayerID", "count " + counter.ToString() + " state: " + isReady.ToString());
+          //  Common.DebugPopUp("GameState on GetNextPlayerID", "count " + counter.ToString() + " state: " + isReady.ToString());
             if (isReady == false)
             {
                 return gameData.playerIDS[counter];
@@ -314,7 +333,7 @@ public class RoundInformation : MonoBehaviour {
             newData.readyStates.Add(false);
             newData.playerIDS.Add(id);
             newData.matchID = matchID;
-            AndroidMessage.Create("Addingthingies initializing game data", "playerIDS "+id);
+            //AndroidMessage.Create("Addingthingies initializing game data", "playerIDS "+id);
         }
         newData.gameState = 0; //(int)GameStates.ChoosingQuestions;
         gameData = newData;

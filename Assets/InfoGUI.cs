@@ -69,8 +69,9 @@ public class InfoGUI : MonoBehaviour {
     {
         readyButton.enabled = true;
     }
-    public void SetReadyToggle(bool value)
+    public void ChangeReadyButtonState(bool value)
     {
-        readyButton.isOn = value;
+        //muuta niin että ei callaa ison true muuttujaa napista, vaan vaihtaa vaan visuaalisen effektin.
+        //readyButton.isOn = value;
     }
 }

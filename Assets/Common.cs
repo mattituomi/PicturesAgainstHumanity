@@ -29,6 +29,7 @@ public static class Common
 
 
 
+
     public static bool valuesLoaded = false;
     
 
@@ -61,7 +62,7 @@ public static class Common
                     return ct.gameObject;
                 }
             }
-            Debug.Log(tr.name);
+            //Debug.Log(tr.name);
             if (tr.tag == tag)
             {
                 return tr.gameObject;
@@ -82,5 +83,10 @@ public static class Common
     public static void DebugLog(string name,string cathegory,string log)
     {
         DebugPanel.Log(name, cathegory,log);
+    }
+
+    public static void printTestWhooo()
+    {
+        Debug.Log("whoo");
     }
 }

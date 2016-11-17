@@ -13,8 +13,18 @@ public class CloudServiceMaster : MonoBehaviour {
 	void Update () {
 	
 	}
+    /*
+    public void AddPhotoToGalleryWithCallBackDelegate()
+    {
+        AddPhotoToGallery();
+       // Common.galleryManager.updateDelegates += Common.playerInformation.PhotoLoadedSuccesfullyDelegate;
+    }
+    */
 
-
+    public void PhotoAddWasSuccesfull()
+    {
+        Common.playerInformation.PhotoLoadedSuccesfull();
+    }
 
     public void AddPhotoToGallery()
     {

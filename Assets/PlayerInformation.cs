@@ -15,8 +15,8 @@ public class PlayerInformation : MonoBehaviour {
     public Texture myImg;
     public string myID="Disconnected";
     public string myGPID="Disconnected";
-    public string myCloudImagePath;
-    public string myLocalImagePath;
+    public string myCloudImagePath="9";
+    public string myLocalImagePath="9";
     public bool connectedToGooglePlay;
     public bool isMyTurn = false;
     
@@ -33,6 +33,9 @@ public class PlayerInformation : MonoBehaviour {
         MyDebug("isHost", isHost.ToString());
         MyDebug("ismyTurn", isMyTurn.ToString());
         MyDebug("myGPID", myGPID.ToString());
+        MyDebug("myCloudImagePath", myCloudImagePath);
+        MyDebug("myLocalImagePath", myLocalImagePath);
+        MyDebug("ready", ready.ToString());
     }
 
     public void setGPID(string gpid)
@@ -42,12 +45,15 @@ public class PlayerInformation : MonoBehaviour {
 
     void MyDebug(string name,string log)
     {
-        Common.DebugLog("PlayerInformation", name,log);
+        Common.DebugLog(name, "PlayerInformation", log);
     }
 
     public void SetURL(string url,int imgNumber)
     {
+        //adding new to my img
         myCloudImagePath = url;
+        Debug.Log("Setting new URL");
+        Common.roundInformation.gameData.roundImageURLs[playerNumber] = url;
         //TODO ADD more images!
     }
 
@@ -57,12 +63,20 @@ public class PlayerInformation : MonoBehaviour {
         Common.gameMaster.PlayerReady(this);
     }
 
-    public void SetMyPlayerInformation(string id)
+    //changes the ID from GBTBM and also changes its values
+    public void SetMyPlayerInformationAndItsValues(string id)
     {
+        Debug.Log("Seeting playerinformation and its values from GPTBM data");
         myID = id;
         GameDataGooglePlay currentData = Common.roundInformation.gameData;
         int foundNumber=FindMyPlayerNumber(currentData, id);
+        
         playerNumber = foundNumber; //FindMyPlayerNumber(currentData, myGPID);
+        ready = Common.roundInformation.gameData.readyStates[playerNumber]; //added 16.11 addding r eady state and imagepath from googleplay data.
+       // if (ready && Common.roundInformation.gameData.AreWeOnPictureState())
+       // {
+            myCloudImagePath = Common.roundInformation.gameData.roundImageURLs[playerNumber];
+        //}
       //  AN_PoupsProxy.showMessage("Playerinformation setmyplayerinfo", "myID "+myGPID+" player number "+playerNumber.ToString());
 
     }
@@ -101,8 +115,17 @@ public class PlayerInformation : MonoBehaviour {
 
     public void ReadyPressedSendImages(bool isTrue)
     {
+        //Idea first add photo to cloud if this is succesfull end turn and set the ready. If this is not succesfull just give up error and don't set ready. We don't want to continue if the uploading of the photo is not succesfull
         Common.cloudServiceMaster.AddPhotoToGallery();
+
         //ready = true;
+       // SetReady();
+        //Common.infoGUI.DisableReadyPressing();
+        //Common.TBM_game.playTurn();
+    }
+    //This method is called when photo is succesfully added to gallery
+    public void PhotoLoadedSuccesfull()
+    {
         SetReady();
         Common.infoGUI.DisableReadyPressing();
         Common.TBM_game.playTurn();
