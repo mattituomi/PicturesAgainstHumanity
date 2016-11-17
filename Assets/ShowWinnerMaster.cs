@@ -237,6 +237,50 @@ public class ShowWinnerMaster : MonoBehaviour {
         Common.getImageFromURL.loadImage(url, this.gameObject, "ImageLoaded");
     }
 
+    public void FavouritePicked(GameObject whichElement)
+    {
+        int counter = 0;
+        bool found = false;
+        foreach(GameObject go in createdElements)
+        {
+            if (whichElement == go)
+            {
+                found = true;
+                break;
+            }
+            counter++;
+        }
+        if (found)
+        {
+            Debug.Log("Found element next lets disable old ones");
+            int pickedWinner = counter;
+            int oldPickedNumber = Common.roundInformation.gameData.winnerVotes[Common.playerInformation.playerNumber];
+            if (oldPickedNumber != -1) //meaning the old is not -1, meaning it has been selected already.
+            {
+                SetFavouritePickedGraphics(oldPickedNumber,false);
+            }
+            Common.roundInformation.gameData.winnerVotes[Common.playerInformation.playerNumber] = pickedWinner;
+            SetFavouritePickedGraphics(pickedWinner, true);
+
+        }
+        else
+        {
+            Common.DebugPopUp("ERROR Favourite picked and elements does not have pressed element FavouritePIcked on showwinnermaster");
+        }
+
+    }
+    public GameObject foundWinnerGraphic;
+    void SetFavouritePickedGraphics(int playerNumber,bool onOff)
+    {
+        Debug.Log("Setting picked graphics " + playerNumber);
+        GameObject go = createdElements[playerNumber];
+        GameObject findGraphic = Common.FindGameObjectInChildWithTagGOTroughAll(go, "WinnerPickedGraphic");
+        foundWinnerGraphic = findGraphic;
+        //Image winnerGraphic=go.FindComponentInChildWithTag<Image>("WinnerPickedGraphic");
+        foundWinnerGraphic.GetComponent<Image>().enabled = onOff;//winnerGraphic.enabled = onOff;
+
+    }
+
     void ImageLoaded(Texture2D loadedImage)
     {
         SetImageToElement(createdElements[playerNumberLoading], loadedImage);

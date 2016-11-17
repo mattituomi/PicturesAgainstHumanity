@@ -71,6 +71,32 @@ public static class Common
         return null;
     }
 
+    public static GameObject FindGameObjectInChildWithTagGOTroughAll(GameObject parent, string tag)
+    {
+        GameObject result=HelperGoTroughChildren(tag, parent.transform, 0);
+        return result;
+    }
+
+    static GameObject found;
+    static GameObject HelperGoTroughChildren(string tag, Transform t, int index)
+    {
+        foreach (Transform tr in t)
+        {
+           // Debug.Log("Checking go named " + tr.name+" index is "+index);
+            GameObject result=HelperGoTroughChildren(tag, tr,index++);
+            if (result != null)
+            {
+                return result;
+            }
+            if (tr.tag == tag)
+            {
+                
+                return tr.gameObject;
+            }
+        }
+        return null;
+    }
+
     public static Image FindPickedImageFromChild(GameObject parent)
     {
         Debug.Log("Finding go from parent :" + parent.name);

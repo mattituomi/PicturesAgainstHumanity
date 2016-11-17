@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using NiceJson;
 using System;
 
-public enum GameDataVariables : int { playerAmount,hostID, roundImageURLs, readyStates ,gameStartTime, gameState, playerPoints ,playerIDS,round,matchID,roundWinnerPlayerNumber,roundDeciderPID,guestion}
+public enum GameDataVariables : int { playerAmount,hostID, roundImageURLs, readyStates ,gameStartTime, gameState, playerPoints ,playerIDS,round,matchID,roundWinnerPlayerNumber,roundDeciderPID,guestion,winnerVotes}
 public enum GameStates: int { Lobby,ChoosingQuestions,PickingPics,PickingWinner,ShowingWinner}
 [System.Serializable]
 public class GameDataGooglePlay
@@ -22,12 +22,14 @@ public class GameDataGooglePlay
     public int roundWinnerPlayerNumber;
     public int roundDeciderPID;
     public string guestion;
+    public List<int> winnerVotes;
 
     public GameDataGooglePlay()
     {
         roundImageURLs = new List<string>();
         readyStates = new List<bool>();
         playerPoints = new List<int>();
+        winnerVotes = new List<int>();
         playerIDS = new List<string>();
     }
 
@@ -41,7 +43,8 @@ public class GameDataGooglePlay
         PrintGD(readyStates.Count.ToString(), "readyStates");
         PrintGD(gameStartTime, "gameStartTime");
         PrintGD(gameState.ToString(), "gameState");
-        PrintGD(playerPoints.Count.ToString(), "playerPoints");
+        PrintGD(ChangeStringListToInt(playerPoints), "playerPoints");
+        PrintGD(ChangeStringListToInt(winnerVotes), "WinnerVotes");
         PrintGD(playerIDS.Count.ToString(), "playerIDS");
         PrintGD(round.ToString(), "round");
         PrintGD(matchID, "matchID");
@@ -55,12 +58,26 @@ public class GameDataGooglePlay
     string ChangeStringListToString(List<string> list)
     {
         string result ="";
+        int counter = 0;
         foreach(string member in list)
         {
-            result += "  " + member;
+            result +=" "+counter.ToString()+":" + member+" ";
+            counter++;
         }
         return result;
-    } 
+    }
+
+    string ChangeStringListToInt(List<int> list)
+    {
+        string result = "";
+        int counter = 0;
+        foreach (int member in list)
+        {
+            result += " " + counter.ToString() + ":" + member.ToString() + " ";
+            counter++;
+        }
+        return result;
+    }
 
     void PrintGD(string log, string name)
     {
@@ -149,7 +166,6 @@ public class RoundInformation : MonoBehaviour {
         gameData.playerPoints[winner] += 1;
     }
 
-    int counter = 0;
     void CreateTestData()
     {
         //   #if UNITY_EDITOR
@@ -329,6 +345,7 @@ public class RoundInformation : MonoBehaviour {
         foreach(string id in playerIdS)
         {
             newData.playerPoints.Add(0);
+            newData.winnerVotes.Add(0);
             newData.roundImageURLs.Add("9");
             newData.readyStates.Add(false);
             newData.playerIDS.Add(id);
@@ -378,6 +395,7 @@ public class RoundInformation : MonoBehaviour {
         JsonObject obj10 = Create1Object(data.roundWinnerPlayerNumber);
         JsonObject obj11 = Create1Object(data.roundDeciderPID);
         JsonObject obj12 = Create1Object(data.guestion);
+        JsonObject obj13 = Create1Object(data.winnerVotes); //added 17.11
         jsonArray.Add(obj0);
         jsonArray.Add(obj1);
         jsonArray.Add(obj2);
@@ -391,7 +409,7 @@ public class RoundInformation : MonoBehaviour {
         jsonArray.Add(obj10);
         jsonArray.Add(obj11);
         jsonArray.Add(obj12);
-
+        jsonArray.Add(obj13);
         Debug.Log(obj1.ToString());
         Debug.Log(jsonArray.ToJsonPrettyPrintString());
         return jsonArray.ToJsonString();
@@ -456,6 +474,10 @@ public class RoundInformation : MonoBehaviour {
                 case GameDataVariables.roundImageURLs:
                     List<string> stringList4 = getListValue(playerAmount, valueObject);
                     newGameData.roundImageURLs = stringList4;
+                    break;
+                case GameDataVariables.winnerVotes:
+                    List<string> stringList5 = getListValue(playerAmount, valueObject);
+                    newGameData.winnerVotes = ListStringConvert(stringList5);
                     break;
             }
             counter++;
