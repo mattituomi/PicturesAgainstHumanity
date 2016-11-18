@@ -12,8 +12,19 @@ public class ParseGuestion : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-      //  Debug.Log(Parse("SDASDASD {x} asdasdas"));
-	}
+        //  Debug.Log(Parse("SDASDASD {x} asdasdas"));
+        /*
+        List<int> intList = new List<int>() { 1, 2, 3, 4, 5 };
+        List<string> stringList = new List<string>() { "1", "2" };
+        List<GameObject> gos = new List<GameObject>();
+        gos.Add(this.gameObject);
+        gos.Add(this.gameObject);
+        gos.Add(this.gameObject);
+        Debug.Log(intList.GetString());
+        Debug.Log(stringList.GetString());
+        Debug.Log(gos.GetString());
+        */
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -61,8 +72,25 @@ public static class ColectionExtension
         return list[Random.Range(0,list.Count)];
     }
 
+
+
+
+    public static string GetString<T>(this IList<T> list)
+    {
+        string result = "";
+        int counter = 0;
+        foreach(T element in list)
+        {
+            result += " " + counter.ToString() + ":" + element.ToString() + " ";
+            counter++;
+        }
+        
+        return result; 
+    }
+
     public static T RandomElement<T>(this T[] array)
     {
         return array[Random.Range(0,array.Length)];
     }
+
 }

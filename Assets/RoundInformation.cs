@@ -43,8 +43,8 @@ public class GameDataGooglePlay
         PrintGD(readyStates.Count.ToString(), "readyStates");
         PrintGD(gameStartTime, "gameStartTime");
         PrintGD(gameState.ToString(), "gameState");
-        PrintGD(ChangeStringListToInt(playerPoints), "playerPoints");
-        PrintGD(ChangeStringListToInt(winnerVotes), "WinnerVotes");
+        PrintGD(ChangeListintToString(playerPoints), "playerPoints");
+        PrintGD(ChangeListintToString(winnerVotes), "WinnerVotes");
         PrintGD(playerIDS.Count.ToString(), "playerIDS");
         PrintGD(round.ToString(), "round");
         PrintGD(matchID, "matchID");
@@ -67,7 +67,7 @@ public class GameDataGooglePlay
         return result;
     }
 
-    string ChangeStringListToInt(List<int> list)
+    public string ChangeListintToString(List<int> list)
     {
         string result = "";
         int counter = 0;

@@ -48,6 +48,45 @@ public class UsefulFunctions : MonoBehaviour
     }
 
 
+    public List<int> InitializeListIntWithVarialbe(int defaultValue,int amount)
+    {
+        List<int> toReturn = new List<int>();
+        for(int n=0; n<amount; n++)
+        {
+            toReturn.Add(defaultValue);
+        }
+        return toReturn;
+        
+    }
+
+    public List<int> orderBySize(List<int> listToOrder)
+    {
+        listToOrder = listToOrder.OrderBy(x => x).ToList();
+        return listToOrder;
+    }
+
+
+    public List<int> BiggestElement(List<int> list)
+    {
+        Debug.Log("Finding biggest element on int list returning List<int> that contains all of the indexes of the biggest elements");
+        List<int> biggest = new List<int>();
+        int cb = -999999999;
+        foreach(int memember in list)
+        {
+            if (memember > cb)
+            {
+                biggest.Clear();
+                cb = memember;
+                
+                biggest.Add(memember);
+            }
+            else if (memember == cb)
+            {
+                biggest.Add(memember);
+            }
+        }
+        return biggest;
+    }
 
     public Transform findLastParent(Transform asker)
     {
