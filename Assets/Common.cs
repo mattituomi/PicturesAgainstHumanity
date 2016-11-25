@@ -27,6 +27,10 @@ public static class Common
     public static TBM_Game_Example TBM_game;
     public static UsefulFunctions usefulFunctions;
 
+    public static GameDataGooglePlay showWinnerTestData;
+
+   
+
 
 
 
@@ -99,7 +103,7 @@ public static class Common
 
     public static Image FindPickedImageFromChild(GameObject parent)
     {
-        Debug.Log("Finding go from parent :" + parent.name);
+       // Debug.Log("Finding go from parent :" + parent.name);
         GameObject go = FindGameObjectInChildWithTag(parent, "PickedImage");
         Image img = go.GetComponent<Image>();
         return img;

@@ -60,7 +60,7 @@ public class TBM_Game_Example : AndroidNativeExampleBase
         }
 
         InitTBM();
-        Init();
+      //  Init();
 
         Invoke("ConnectGooglePlay", 4f); //OTA POIS HELPOTTAA DEBUGAUSTA
     }
@@ -70,7 +70,9 @@ public class TBM_Game_Example : AndroidNativeExampleBase
 
     public void Init()
     {
+
         AN_PoupsProxy.showMessage("Initializing action functions Init ", " Init called");
+
         GooglePlayTBM.ActionMatchUpdated += ActionMatchUpdated;
         GooglePlayTBM.ActionMatchDataLoaded += ActionMatchDataLoadedFunction;
         GooglePlayTBM.ActionMatchesResultLoaded += ActionMatchesDataLoadedFunction;
@@ -79,10 +81,16 @@ public class TBM_Game_Example : AndroidNativeExampleBase
         GooglePlayTBM.ActionMatchInvitationAccepted += GooglePlayTBM_ActionMatchInvitationAccepted;
         GooglePlayTBM.ActionMatchCreationCanceled += ActionMatchCreationCanceled;
         GooglePlayTBM.ActionMatchInitiated += ActionMatchInitiated;
-        GooglePlayInvitationManager.Instance.RegisterInvitationListener();
+        GooglePlayTBM.ActionMatchCanceled += ActionMatchCanceledFunction;
+        
         GooglePlayInvitationManager.ActionInvitationReceived += ActionInvitationReceived;
 
         GooglePlayInvitationManager.ActionInvitationReceived += OnInvite;
+
+        GooglePlayTBM.Instance.RegisterMatchUpdateListener();
+        GooglePlayInvitationManager.Instance.RegisterInvitationListener();
+
+
     }
     private void ActionInvitationReceived(GP_Invite invitation)
     {
@@ -147,6 +155,8 @@ public class TBM_Game_Example : AndroidNativeExampleBase
     // go onto the next player, which may be himself.
     public void playTurn()
     {
+        //Before we play turn, lets update the data based on changes I have made.
+        Common.playerInformation.ChangeGameDataValuesAccordingToMyData();
         bool isAllready = Common.roundInformation.AllReady();
         string nextParticipantId = "";
         if (!isAllready)
@@ -179,8 +189,33 @@ public class TBM_Game_Example : AndroidNativeExampleBase
 
         unShowTurnUI();
         Invoke("unShowLoadingPopUp", 4f);
+
         GooglePlayTBM.Instance.TakeTrun(mMatch.Id, byteArray, nextParticipantId);
 
+    }
+
+    public delegate void TurnFinishDelegate();
+    public void playTurnWithCallBack(TurnFinishDelegate del)
+    {
+        playTurn();
+        del();
+    }
+
+    public void LoadCurrentMatchData()
+    {
+        
+        GooglePlayTBM.Instance.LoadMatchInfo(mMatch.Id);
+    }
+
+    public void CancelMatch()
+    {
+       // GooglePlayTBM.Instance.matchi
+        GooglePlayTBM.Instance.CancelMatch(mMatch.Id);
+    }
+
+    public void ActionMatchCanceledFunction(GP_TBM_CancelMatchResult result)
+    {
+        Common.DebugPopUp("Action Match canceled "+result.MatchId);
     }
 
     //#endif
@@ -247,7 +282,7 @@ private void ActionAvaliableDeviceAccountsLoaded(List<string> result)
         int ROLE_WIZARD = 0x4; // 100 in binary
         GooglePlayTBM.Instance.SetExclusiveBitMask(ROLE_WIZARD);
 
-        GooglePlayTBM.Instance.RegisterMatchUpdateListener();
+      //  GooglePlayTBM.Instance.RegisterMatchUpdateListener();
 
     }
 
@@ -343,7 +378,6 @@ private void ActionAvaliableDeviceAccountsLoaded(List<string> result)
     void DealWithMatchData(GP_TBM_Match match)
     {
         mMatch = match;
-
        // Common.DebugPopUp("Dealing with match nata", "Participant info " + mMatch.PendingParticipantId);
         if (mMatch.Data != null)
         {
@@ -355,7 +389,7 @@ private void ActionAvaliableDeviceAccountsLoaded(List<string> result)
                 Common.roundInformation.SetNewGameDataFromGooglePlay(mMatch.Data);
                 // AndroidMessage.Create("match data not empty", "it is  " + stringData);
                 StartDoingTurn(mMatch);
-                LoadAllParticipantInfoStartRoutine();
+                CreateParticipantUI();
                 return;
             }
         }
@@ -366,25 +400,64 @@ private void ActionAvaliableDeviceAccountsLoaded(List<string> result)
 
         // Let the player take the first turn
         StartDoingTurn(mMatch);
-        LoadAllParticipantInfoStartRoutine();
+        CreateParticipantUI();
         //SetGameStateBased on gameState
 
 
     }
 
-    void LoadAllParticipantInfoStartRoutine()
+    public void InstantiateOnePIUI()
     {
+        participantInfo.SetActive(false);
+        GameObject createdUI = (GameObject)Instantiate(participantInfo);
+        createdParticipantInfos.Add(createdUI);
+        createdUI.transform.SetParent(infosParent.transform, false);
+        createdUI.SetActive(true);
+    }
+
+    void CreateParticipantUI()
+    {
+        CreateParticipantsInfos(mMatch.Participants.Count);
+
         StartCoroutine(LoadAllParticipantsIntoUI());
     }
+
+    public void CreateParticipantsInfos(int amount)
+    {
+        if (createdParticipantInfos == null)
+        {
+            createdParticipantInfos = new List<GameObject>();
+        }
+        Common.usefulFunctions.CreateElementsAndFill_If_Needed(amount, InstantiateOnePIUI, createdParticipantInfos);  //mMatch.Participants.Count
+
+        //lets setup icons
+        icons =new Image[createdParticipantInfos.Count];
+        int counter = 0;
+        /*
+        foreach(GameObject ce in createdParticipantInfos)
+        {
+            icons[counter] = ce.GetComponentInChildren<Image>();
+            counter++;
+        }
+        */
+    }
+
+
+
     bool loadingIcon = false;
+    public GameObject participantInfo;
+    public GameObject infosParent;
+    List<GameObject> createdParticipantInfos;
     IEnumerator LoadAllParticipantsIntoUI()
     {
         int counter = 0;
+       
         foreach (GP_Participant part in mMatch.Participants)
         {
+            
             // AndroidMessage.Create("Participant", "Participant info " + part.DisplayName + " +" +  " id " + part.id + " pid " + part.playerId);
             loadingIcon = true;
-            ParticipantInfoUI piui = icons[counter].gameObject.GetComponent<ParticipantInfoUI>();
+            ParticipantInfoUI piui = createdParticipantInfos[counter].GetComponent<ParticipantInfoUI>(); //icons[counter].gameObject.GetComponent<ParticipantInfoUI>();
             bool isMyP = false;
             bool isMyT = false;
             int myNumber = Common.roundInformation.FindNumberBasedOnID(part.id);
@@ -397,9 +470,11 @@ private void ActionAvaliableDeviceAccountsLoaded(List<string> result)
             {
                 isMyT = true;
             }
-            piui.setParticipantValues(part.id, part.playerId, part.DisplayName, isReady, isMyP, isMyT);
+            piui.setParticipantValues(part.id, part.Status.ToString(), part.DisplayName, isReady, isMyP, isMyT);  //part.playerId
+            piui.SetPoints(Common.roundInformation.gameData.playerPoints[myNumber]);
             Debug.Log("Set new piuiu" + counter.ToString() + " values are :" + "id " + part.id + " pid " + part.playerId + " dn " + part.DisplayName + " isr " + isReady + " ismp " + isMyP + "is myT" + isMyT);
             LoadParticipantIcon(counter);
+            
             while (loadingIcon)
             {
                 yield return new WaitForSeconds(0.1f);
@@ -421,11 +496,12 @@ private void ActionAvaliableDeviceAccountsLoaded(List<string> result)
         Common.getImageFromURL.loadImage(ulr, this.gameObject, "IconLoadFinished");
 
     }
-    public Image[] icons;
+    Image[] icons;
     int toChoose;
     void IconLoadFinished(Texture2D texture)
     {
-        Common.SetTexture2DToImage(icons[toChoose], texture);
+        createdParticipantInfos[toChoose].GetComponent<ParticipantInfoUI>().SetImage(texture);
+        //Common.SetTexture2DToImage(icons[toChoose], texture);
         loadingIcon = false;
     }
 
@@ -497,8 +573,10 @@ private void ActionAvaliableDeviceAccountsLoaded(List<string> result)
         AndroidMessage.Create("Loaded match data ", "loaad ");
         foreach (GP_Participant part in result.Match.Participants)
         {
-            AndroidMessage.Create("Participant", "Participant info " + part.DisplayName + " +" + part.IconImageUrl + " id " + part.id + " pid " + part.playerId);
+          //  AndroidMessage.Create("Participant", "Participant info " + part.DisplayName + " +" + part.IconImageUrl + " id " + part.id + " pid " + part.playerId);
         }
+        GP_TBM_Match match = result.Match;
+        DealWithMatchData(match);
     }
 
     List<GP_TBM_Match> matchDatasLoaded;
@@ -641,6 +719,7 @@ private void ActionAvaliableDeviceAccountsLoaded(List<string> result)
 
     private void OnPlayerConnected()
     {
+        Init();
         SA_StatusBar.text = "Player Connected";
         playerLabel.text = GooglePlayManager.Instance.player.name;
         playerConnectedStatus.text = GooglePlayManager.Instance.player.name;

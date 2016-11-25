@@ -40,7 +40,7 @@ public class GameDataGooglePlay
         PrintGD(playerAmount.ToString(), "playerAmount");
         PrintGD(hostID,"hostID");
         PrintGD(ChangeStringListToString(roundImageURLs), "roundImageURLs");
-        PrintGD(readyStates.Count.ToString(), "readyStates");
+        PrintGD(readyStates.GetString(), "readyStates");
         PrintGD(gameStartTime, "gameStartTime");
         PrintGD(gameState.ToString(), "gameState");
         PrintGD(ChangeListintToString(playerPoints), "playerPoints");
@@ -106,6 +106,9 @@ public class RoundInformation : MonoBehaviour {
     public bool initializeTestData = true;
     public bool useTestDataAsGameData = false;
 
+    public int hostChoice;
+    public List<int> voteWinners;
+
 
     // Use this for initialization
     void Start () {
@@ -161,9 +164,14 @@ public class RoundInformation : MonoBehaviour {
 
     void EndOneRound()
     {
-
-        int winner=gameData.roundWinnerPlayerNumber;
-        gameData.playerPoints[winner] += 1;
+        Debug.Log("Ending round current winners are " + hostChoice.ToString() + " current pending is " + gameData.roundDeciderPID);
+        Common.DebugLog("winner", "ENDROUND", hostChoice.ToString());
+        Common.DebugLog("decider","ENDROUND", gameData.roundDeciderPID.ToString());
+        gameData.playerPoints[hostChoice] += 1;
+        foreach(int wp in voteWinners)
+        {
+            gameData.playerPoints[wp] += 1;
+        }
     }
 
     void CreateTestData()
@@ -282,9 +290,9 @@ public class RoundInformation : MonoBehaviour {
 
                 break;
             case GameStates.ChoosingQuestions:
-
+               // Common.gameMaster.DetermineWinnerAndLoadTheSceneUI();
                 break;
-            case GameStates.PickingWinner:
+            case GameStates.ShowingWinner:
                 EndOneRound();
                 break;
 
@@ -338,7 +346,7 @@ public class RoundInformation : MonoBehaviour {
         GameDataGooglePlay newData = new GameDataGooglePlay();
         newData.playerAmount = playerIdS.Count;
         newData.hostID =playerIdS[0] ;
-        newData.gameStartTime = Time.time.ToString();
+        newData.gameStartTime = Common.usefulFunctions.GetLongTime();
         newData.roundDeciderPID =0;
         newData.roundWinnerPlayerNumber = -1;
         newData.guestion = "Haven't been set yet";

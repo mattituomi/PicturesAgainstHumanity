@@ -38,6 +38,12 @@ public class UsefulFunctions : MonoBehaviour
         return timenow;
     }
 
+    public string GetLongTime()
+    {
+        string timenow = System.DateTime.Now.ToLongTimeString();
+        return timenow;
+    }
+
     public string GetPreviousMethodName()
     {
         System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
@@ -65,12 +71,61 @@ public class UsefulFunctions : MonoBehaviour
         return listToOrder;
     }
 
+    public delegate void Del();
+
+
+    //Creates more elements or removes elements if it is needed to make the size of elements new. Callback is the function to calal when instantiating things
+    public List<GameObject> CreateElementsAndFill_If_Needed(int playerAmount,Del instantiateFunction,List<GameObject> createdElements)
+    {
+        
+        int currentAmount = createdElements.Count;
+        int difference = currentAmount - playerAmount;
+        int howManyNeededMore = 0;
+        if (currentAmount != 0)
+        {
+            if (difference > 0)
+            {
+                for (int n = playerAmount; n < currentAmount; n++)
+                {
+                    Destroy(createdElements[n]);
+                }
+                for (int n = playerAmount; n < currentAmount; n++)
+                {
+                    createdElements.RemoveAt(playerAmount);
+                }
+                return createdElements;
+            }
+            if (difference == 0)
+            {
+                return createdElements;
+            }
+            if (difference < 0)
+            {
+                howManyNeededMore = Mathf.Abs(difference);
+            }
+        }
+        Common.DebugPopUp("Creating elements amount of players " + playerAmount.ToString());
+        //xSize = oneGUIelement.GetComponent<RectTransform>().rect.width;
+
+        for (int n = 0; n < playerAmount; n++)
+        {
+            if (howManyNeededMore == 0 || currentAmount <= n)
+            {
+                instantiateFunction();
+            }
+        }
+        return createdElements;
+        
+
+    }
+
 
     public List<int> BiggestElement(List<int> list)
     {
         Debug.Log("Finding biggest element on int list returning List<int> that contains all of the indexes of the biggest elements");
         List<int> biggest = new List<int>();
         int cb = -999999999;
+        int counter = 0;
         foreach(int memember in list)
         {
             if (memember > cb)
@@ -78,12 +133,13 @@ public class UsefulFunctions : MonoBehaviour
                 biggest.Clear();
                 cb = memember;
                 
-                biggest.Add(memember);
+                biggest.Add(counter);
             }
             else if (memember == cb)
             {
-                biggest.Add(memember);
+                biggest.Add(counter);
             }
+            counter++;
         }
         return biggest;
     }

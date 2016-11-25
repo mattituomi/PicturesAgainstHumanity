@@ -48,9 +48,12 @@ public class TBM_example_original : AndroidNativeExampleBase
             //checking if player already connected
             OnPlayerConnected();
         }
-
+        
         InitTBM();
+        Init();
     }
+
+
 
 
 
@@ -58,6 +61,7 @@ public class TBM_example_original : AndroidNativeExampleBase
     public void Init()
     {
         GooglePlayTBM.ActionMatchUpdated += ActionMatchUpdated;
+        GooglePlayTBM.Instance.RegisterMatchUpdateListener();
     }
 
 
@@ -71,8 +75,13 @@ public class TBM_example_original : AndroidNativeExampleBase
     // go onto the next player, which may be himself.
     public void playTurn()
     {
-
-        string nextParticipantId = mMatch.Participants[1].id; //string.Empty;
+        int rand=Random.Range(0, 2);
+        string nextParticipantId = mMatch.Participants[0].id; //string.Empty;
+        if (nextParticipantId == mMatch.PendingParticipantId)
+        {
+            nextParticipantId = mMatch.Participants[1].id;
+        }
+        
 
         // Get the next participant in the game-defined way, possibly round-robin.
         //nextParticipantId = getNextParticipantId();
@@ -80,11 +89,11 @@ public class TBM_example_original : AndroidNativeExampleBase
 
         // Get the updated state. In this example, we simply use a
         // a pre-defined string. In your game, there may be more complicated state.
-        string mTurnData = "My turn data sample";
+        string mTurnData = "1";
 
         // At this point, you might want to show a waiting dialog so that
         // the current player does not try to submit turn actions twice.
-        AndroidNativeUtility.ShowPreloader("Loading..", "Sending the tunr data");
+        AndroidNativeUtility.ShowPreloader("Loading..", "Sending the tunr data next is "+nextParticipantId);
 
         // Invoke the next turn. We are converting our data to a byte array.
 
@@ -92,8 +101,9 @@ public class TBM_example_original : AndroidNativeExampleBase
         byte[] byteArray = encoding.GetBytes(mTurnData);
 
         GooglePlayTBM.Instance.TakeTrun(mMatch.Id, byteArray, nextParticipantId);
-
     }
+
+
 
 #endif
 
@@ -118,6 +128,7 @@ public class TBM_example_original : AndroidNativeExampleBase
 
     public void ShowInboxUI()
     {
+        Debug.Log("Showing inbox");
         GooglePlayTBM.Instance.ShowInbox();
     }
 
@@ -135,8 +146,8 @@ public class TBM_example_original : AndroidNativeExampleBase
         GooglePlayTBM.ActionMatchCreationCanceled += ActionMatchCreationCanceled;
         GooglePlayTBM.ActionMatchInitiated += ActionMatchInitiated;
 
-        int minPlayers = 2;
-        int maxPlayers = 2;
+        int minPlayers = 1;
+        int maxPlayers = 4;
         bool allowAutomatch = true;
 
         GooglePlayTBM.Instance.StartSelectOpponentsView(minPlayers, maxPlayers, allowAutomatch);
@@ -158,8 +169,9 @@ public class TBM_example_original : AndroidNativeExampleBase
             AndroidMessage.Create("Match Initi Failed", "Status code: " + result.Response);
             return;
         }
-
+        AndroidMessage.Create("Match Initi succesfull", "Status code: " + result.Response);
         GP_TBM_Match Match = result.Match;
+        mMatch = Match;
         // If this player is not the first player in this match, continue.
         if (Match.Data != null)
         {
@@ -168,7 +180,7 @@ public class TBM_example_original : AndroidNativeExampleBase
         }
 
         // Otherwise, this is the first player. Initialize the game state.
-        //initGame(match);
+       // initGame(match);
 
         // Let the player take the first turn
         //showTurnUI(match);
@@ -186,8 +198,9 @@ public class TBM_example_original : AndroidNativeExampleBase
 
     public void SendHello()
     {
+        AndroidMessage.Create("Played turn ", "play turn");
         playTurn();
-        AndroidMessage.Create("Played turn ","play turn");
+        
         
     }
 

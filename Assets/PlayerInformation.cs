@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlayerInformation : MonoBehaviour {
 
@@ -12,13 +13,18 @@ public class PlayerInformation : MonoBehaviour {
     public bool ready=false;
     public int playerNumber = -1;
     public bool isHost = false;
-    public Texture myImg;
+    public Texture myImgTexture;
     public string myID="Disconnected";
     public string myGPID="Disconnected";
     public string myCloudImagePath="9";
     public string myLocalImagePath="9";
     public bool connectedToGooglePlay;
     public bool isMyTurn = false;
+    public int myVote = -1;
+    public Image myImage;
+    public GameObject ReadyButton;
+    public GameObject pickGallery;
+    public GameObject pickImageFromCamera;
     
 
 	// Use this for initialization
@@ -52,16 +58,28 @@ public class PlayerInformation : MonoBehaviour {
     {
         //adding new to my img
         myCloudImagePath = url;
-        Debug.Log("Setting new URL");
-        Common.roundInformation.gameData.roundImageURLs[playerNumber] = url;
+      //  Debug.Log("Setting new URL");
+     //   Common.roundInformation.gameData.roundImageURLs[playerNumber] = url;
         //TODO ADD more images!
     }
 
     public void SetReady()
     {
-        ready = true;
+        ready =true;
         Common.gameMaster.PlayerReady(this);
+        Debug.Log("New Ready state "+ready.ToString() );
     }
+
+    public void ChangeGameDataValuesAccordingToMyData()
+    {
+        GameDataGooglePlay data = Common.roundInformation.gameData;
+        data.readyStates[playerNumber]=ready;
+        data.roundImageURLs[playerNumber]= myCloudImagePath;
+        data.winnerVotes[playerNumber] = myVote;
+    }
+
+
+
 
     //changes the ID from GBTBM and also changes its values
     public void SetMyPlayerInformationAndItsValues(string id)
@@ -76,6 +94,23 @@ public class PlayerInformation : MonoBehaviour {
        // if (ready && Common.roundInformation.gameData.AreWeOnPictureState())
        // {
             myCloudImagePath = Common.roundInformation.gameData.roundImageURLs[playerNumber];
+        if (ready)
+        {
+            pickGallery.SetActive(false);
+            pickImageFromCamera.SetActive(false);
+        }
+        else
+        {
+            if (Common.roundInformation.gameData.gameState == (int)GameStates.PickingPics)
+            {
+                pickGallery.SetActive(true);
+                pickImageFromCamera.SetActive(true);
+            }else
+            {
+                pickGallery.SetActive(false);
+                pickImageFromCamera.SetActive(false);
+            }
+        }
         //}
       //  AN_PoupsProxy.showMessage("Playerinformation setmyplayerinfo", "myID "+myGPID+" player number "+playerNumber.ToString());
 
@@ -110,7 +145,7 @@ public class PlayerInformation : MonoBehaviour {
     public void LocalImagePicked(string imagePickPath)
     {
         myLocalImagePath = imagePickPath;
-        Common.infoGUI.ReadyButtonToInteractable();
+      //  Common.infoGUI.ReadyButtonToInteractable();
     }
 
     public void ReadyPressedSendImages(bool isTrue)
@@ -127,12 +162,43 @@ public class PlayerInformation : MonoBehaviour {
     public void PhotoLoadedSuccesfull()
     {
         SetReady();
-        Common.infoGUI.DisableReadyPressing();
-        Common.TBM_game.playTurn();
+        Common.TBM_game.playTurnWithCallBack(TurnEndedCallBack);
+       // Common.infoGUI.DisableReadyPressing();
+        //Common.TBM_game.playTurn();
     }
+
+    public void TurnEndedCallBack()
+    {
+        Debug.Log("Turn was ended");
+        ReadyButton.GetComponent<Toggle>().interactable = false;
+    }
+
+    public void ReadyButtonToDefaultState()
+    {
+        ReadyButton.GetComponent<Toggle>().interactable = true;
+        ReadyButton.SetActive(false);
+    }
+
+    public void ReadyButtonTest()
+    {
+        ReadyButton.GetComponent<Toggle>().interactable =! ReadyButton.GetComponent<Toggle>().interactable;
+        ReadyButton.SetActive(true);
+
+    }
+    /*
+    public void SetPlayerInformationValuesForState(int state)
+    {
+        if (state == (int)GameStates.PickingPics)
+        {
+            ReadyButtonToDefaultState();
+        }
+    }
+    */
 
     public void SetMyImage(Texture downloadedImage)
     {
+        Debug.Log("Setting myImage with Texture");
+
         Common.infoGUI.pickResult.material.mainTexture = downloadedImage;
         Material newMaterial = new Material(Common.infoGUI.pickResult.material);
         //  newMaterial.SetTexture("_MainTex", newText); //sprite.texture);
@@ -141,11 +207,18 @@ public class PlayerInformation : MonoBehaviour {
         // Common.infoGUI.pickResult.GetComponent<CanvasRenderer>().SetPropertyBlock(block);
         newMaterial.SetTexture("_MainTex", downloadedImage);
         Common.infoGUI.pickResult.material = newMaterial;
-        myImg = downloadedImage;
+        myImgTexture = downloadedImage;
+        
     }
 
     public void SetMyImage(Texture2D downloadedImage)
     {
+        Debug.Log("Setting my Image with Texture2D");
+        Common.SetTexture2DToImage(myImage, downloadedImage);
+        myImgTexture = downloadedImage;
+
+        //MUUTA ETTÄ INFOGUI TILASTA KÄYTETÄÄN oikeata asiaa elikkä mun valittua kuvaa
+        /*
         Common.infoGUI.pickResult.material.mainTexture = downloadedImage;
         Material newMaterial = new Material(Common.infoGUI.pickResult.material);
         //  newMaterial.SetTexture("_MainTex", newText); //sprite.texture);
@@ -154,7 +227,10 @@ public class PlayerInformation : MonoBehaviour {
         // Common.infoGUI.pickResult.GetComponent<CanvasRenderer>().SetPropertyBlock(block);
         newMaterial.SetTexture("_MainTex", downloadedImage);
         Common.infoGUI.pickResult.material = newMaterial;
-        myImg = downloadedImage;
+        */
+        //myImgTexture = downloadedImage;
+        ReadyButton.SetActive(true);
+        ReadyButton.GetComponent<Toggle>().interactable = true;
     }
 
 }

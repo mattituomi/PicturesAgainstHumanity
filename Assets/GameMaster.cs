@@ -38,12 +38,12 @@ public class GameMaster : MonoBehaviour {
     {
         Debug.Log("Player is ready");
         string debugL ="PlayerNumber on player that is ready is "+ player.playerNumber.ToString();
-        Common.DebugPopUp(debugL);
-        Common.roundInformation.gameData.readyStates[player.playerNumber]=true;
+       // Common.DebugPopUp(debugL);
+        //Common.roundInformation.gameData.readyStates[player.playerNumber]=true;
         
     }
 
-    public void DetermineWinner()
+    public void DetermineWinnerAndLoadTheSceneUI()
     {
         Debug.Log("determining winner");
         List<int> winnerVotes = Common.roundInformation.gameData.winnerVotes;
@@ -55,12 +55,18 @@ public class GameMaster : MonoBehaviour {
         {
             votesPerPlayer[vote]++;
         }
+        Debug.Log("Votes per player is " + votesPerPlayer.GetString());
         List<int> voteWinners = Common.usefulFunctions.BiggestElement(votesPerPlayer);
         Debug.Log("Common round winners are "+voteWinners.GetString());
         int hostChoice = winnerVotes[Common.roundInformation.gameData.roundDeciderPID];
         Debug.Log("Host choice " + hostChoice.ToString());
         //Debug.Log(Common.roundInformation.gameData.ChangeListintToString(votesPerPlayer));
-        
+        Debug.Log("LETS SET UP GRAPHICS");
+        Common.roundInformation.hostChoice = hostChoice;
+        Common.roundInformation.voteWinners = voteWinners;
+        Common.showWinnerMaster.SetUpShowWinnerScene(hostChoice, voteWinners);
+
+
     }
 
     public void GoToGameStateBasedOnData(GameDataGooglePlay givenData)

@@ -127,7 +127,8 @@ public class GooglePlayTBM : SA.Common.Pattern.Singleton<GooglePlayTBM>
 	public void LoadMatchInfo(string matchId)
 	{
 		AN_GMSRTMProxy.TBM_LoadMatchInfo(matchId);
-	}
+
+    }
 	
 	
 	public void LoadMatchesInfo(GP_TBM_MatchesSortOrder sortOreder, params GP_TBM_MatchTurnStatus[] matchTurnStatuses)

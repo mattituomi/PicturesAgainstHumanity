@@ -10,6 +10,7 @@ public class ParticipantInfoUI : MonoBehaviour {
     public Toggle readyToggle;
     public Toggle myPlayerIndicator;
     public Toggle onTurnIndicator;
+    public Text myPoints;
 
     public void setParticipantValues(string mgID, string mID, string displayName, bool isReady, bool isMyPlayer, bool isMyTurn)
     {
@@ -19,6 +20,16 @@ public class ParticipantInfoUI : MonoBehaviour {
         readyToggle.isOn = isReady;
         myPlayerIndicator.isOn = isMyPlayer;
         onTurnIndicator.isOn = isMyTurn;
+    }
+
+    public void SetImage(Texture2D texture)
+    {
+        Common.SetTexture2DToImage(myImage, texture);
+    }
+
+    public void SetPoints(int newPoints)
+    {
+        myPoints.text = newPoints.ToString();
     }
 	// Use this for initialization
 	void Start () {

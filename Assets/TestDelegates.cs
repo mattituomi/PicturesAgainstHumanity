@@ -30,6 +30,16 @@ public class TestDelegates : MonoBehaviour {
         updateDelegates -= Common.printTestWhooo;
         //updateDelegates -= Common.gameLoader.printTestWhooo;
         RunUpdateDelegate();
+        //Del handler = DelegateMethod;
+       // MethodWithCallback(1, 2, handler);
+    }
+
+
+    public delegate void Del(string message);
+
+    public void MethodWithC6allback(int param1, int param2, Del callback)
+    {
+        callback("The number is: " + (param1 + param2).ToString());
     }
 
 

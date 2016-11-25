@@ -37,6 +37,7 @@ public class CameraMaster : MonoBehaviour {
         {
             //  AN_PoupsProxy.showMessage("Image Pick Rsult", "Succeeded, path: " + result.ImagePath);
             Common.DebugPopUp("CameraMaster fun OnImagePicked", "Succeeded, path: " + result.ImagePath);
+            
             // Common.infoGUI.SetImage(result.Image);//.GetComponent<Renderer>().material.mainTexture = result.Image;
             Common.playerInformation.SetMyImage(result.Image);
             path = result.ImagePath;

@@ -1,0 +1,4 @@
+TESTAA TOImiiko show winner master
+Tee mitä tapahtuu kun round loppuu ja laita looppaan.
+Testaa että jos eka loudaat pick winner ja menet show winner laataako kuvat uudestaan vai ottaa vanhat.
+Mieti player leave miten tehdä fiksuiten.

@@ -155,6 +155,10 @@ public class GameLoader : MonoBehaviour {
                 Debug.Log("Loading all images from playuer URL");
                 Common.showWinnerMaster.LoadAllImagesFromPlayerURLS();
             }
+            if (gameData.gameState == (int)GameStates.ShowingWinner)
+            {
+                Common.gameMaster.DetermineWinnerAndLoadTheSceneUI();
+            }
         }
         }
 

@@ -16,11 +16,16 @@ public class CloudImageManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        /*
         if (Input.GetKeyDown(KeyCode.S))
         {
             string filePath = System.IO.Path.GetFullPath(filePathTest);
-            UploadFileToCloud("Test","matti4",filePath);
+            string filePath1 = System.IO.Path.GetFullPath(filePathTest1);
+            string filePath2 = System.IO.Path.GetFullPath(filePathTest2);
+            UploadFileToCloud("a","AAA",filePath);
+
         }
+        */
 	}
     public void UploadFileToCloud(string fileName,string userName,string filePath)
     {
@@ -39,7 +44,9 @@ public class CloudImageManager : MonoBehaviour {
 
     String filenNameTest = "image2.jpg";
     String description = "File Description";
-    String filePathTest = "Assets//Resources//image3.jpg";//"C:\\Users\\Matti\\Documents\\HoorayProto\\Pictures against humanity\\Assets\\Resources";
+    String filePathTest = "Assets//Resources//1.png";//"C:\\Users\\Matti\\Documents\\HoorayProto\\Pictures against humanity\\Assets\\Resources";
+    String filePathTest1 = "Assets//Resources//2.png";
+    String filePathTest2 = "Assets//Resources//3.png";
     public string callBackToGetFile;
     public string callBackToUploadFile;
     public GameObject cbgetFileGO;

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class ShowWinnerMaster : MonoBehaviour {
     public GameObject oneGUIelement;
     public List<GameObject> createdElements;
+    public List<string> createdElementsLoadedImagesURLS;
     public float xSize = 10f;
     bool lookedEveryImage = false;
     public int whatPlayerAmountTouse = 4;
@@ -23,7 +24,9 @@ public class ShowWinnerMaster : MonoBehaviour {
 
     bool CheckIfActive()
     {
-        if ((GameStates)Common.roundInformation.gameData.gameState == GameStates.PickingWinner)
+        GameStates deb = (GameStates)Common.roundInformation.gameData.gameState;
+      //  Debug.Log(deb);
+        if (deb == GameStates.PickingWinner)
             return true;
         return false;
     }
@@ -69,7 +72,7 @@ public class ShowWinnerMaster : MonoBehaviour {
                     lookedEveryImage = true;
                 }
             }
-
+           // Debug.Log("here");
             if (Input.GetKeyDown(KeyCode.L))
             {
                 StartCoroutine(LoadAllImages());
@@ -77,6 +80,7 @@ public class ShowWinnerMaster : MonoBehaviour {
             }
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
+                Debug.Log("Left");
                 SwipeLeft();
             }
             if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -152,6 +156,7 @@ public class ShowWinnerMaster : MonoBehaviour {
                 for (int n = playerAmount; n < currentAmount; n++)
                 {
                     createdElements.RemoveAt(playerAmount);
+                    createdElementsLoadedImagesURLS.RemoveAt(playerAmount);
                 }
                 return;
             }
@@ -176,13 +181,14 @@ public class ShowWinnerMaster : MonoBehaviour {
                 GameObject createdObject = (GameObject)Instantiate(oneGUIelement, positionGoer, Quaternion.identity);
                 createdObject.SetActive(true);
                 createdElements.Add(createdObject);
+                createdElementsLoadedImagesURLS.Add("");
                 
                 RectTransform createdRect = createdObject.GetComponent<RectTransform>();
                 createdRect.anchoredPosition = recPosGoer;
                 createdObject.transform.localScale = oneGUIelement.transform.localScale;
 
                 createdObject.transform.position = new Vector3(createdObject.transform.localPosition.x, createdObject.transform.localPosition.y, oneGUIelement.transform.localPosition.z);
-                createdObject.transform.SetParent(Common.gameLoader.ShowWinnerUI.transform, false);
+                createdObject.transform.SetParent(Common.gameLoader.PickWinnerUI.transform, false);
                 //createdObject.transform.SetParent(Common.gameLoader.ShowWinnerUI.transform);
 
 
@@ -198,6 +204,7 @@ public class ShowWinnerMaster : MonoBehaviour {
     }
     public bool loadingIMage = false;
     public int playerNumberLoading = -1;
+
     public int intGoer = 0;
     public Camera UIcamera;
     bool movingCamera = false;
@@ -207,9 +214,113 @@ public class ShowWinnerMaster : MonoBehaviour {
     float moveStartTime;
     float moveDuration = 1f;
 
+    public Image pickerChoiceImage;
+    public List<Image> voteWinnerImage;
+
     public void LoadAllImagesFromPlayerURLS()
     {
         StartCoroutine(LoadAllImages());
+    }
+
+    public void SetUpShowWinnerScene(int hostChoice,List<int> voteWinners)
+    {
+        string urlToGet = Common.roundInformation.gameData.roundImageURLs[hostChoice];
+        if (checkIfImagesAlreadyLoaded(urlToGet))
+        {
+            //URL has already been loaded to elements, so we don't have to load it again.
+            pickerChoiceImage.sprite = FindSpriteFromElement(hostChoice);
+            int counter = 0;
+            foreach (int voteWinner in voteWinners)
+            {
+                voteWinnerImage[counter].sprite = FindSpriteFromElement(voteWinner);
+                //GameObject newImage = (GameObject)Instantiate(voteWinnerImage.gameObject);
+                //newImage.GetComponent<Image>().sprite = FindSpriteFromElement(voteWinner);
+                counter++;
+            }
+        }
+        else
+        {
+            //no iamges loaded already lets load sprites again.
+            Debug.Log("Starting to load images");
+            StartCoroutine(loadShowWinnerImages(hostChoice, voteWinners));
+        }
+
+        //Common.SetTexture2DToImage(img, result);
+    }
+
+    bool checkIfImagesAlreadyLoaded(string ulrToGet)
+    {
+        Debug.Log("checking if images already loaded on show winner");
+        if (createdElementsLoadedImagesURLS!=null)
+        {
+            if (createdElementsLoadedImagesURLS.Contains(ulrToGet))
+            {
+                Debug.Log("Images already loaded, no need to load them again");
+                return true;
+            }
+        }
+        Debug.Log("images haven't been loaded");
+        return false;
+    }
+
+    IEnumerator loadShowWinnerImages(int hostChoice,List<int> voteWinners)
+    {
+
+        string urlToGet = Common.roundInformation.gameData.roundImageURLs[hostChoice];
+        int amount = 1+voteWinners.Count;
+        for(int n=0; n<amount; n++)
+        {
+            Debug.Log("LoadAllimages on showWinner index loading " + n.ToString());
+            LoadOneShowWinnerImage(n,hostChoice,voteWinners);
+            while (loadingIMage)
+            {
+                yield return new WaitForSeconds(Time.smoothDeltaTime);
+            }
+        }
+    }
+
+    int whatShowWinnerLoading = -1; //-1 not setted, 0 host pick, 1 vote first, 2 vote second etc...
+    void LoadOneShowWinnerImage(int whatLoading,int hostChoice, List<int> voteWinners)
+    {
+        loadingIMage = true;
+        playerNumberLoading = whatLoading;
+        string ulrToLoad = "";
+        switch (whatLoading)
+        {
+            case 0:
+                ulrToLoad= Common.roundInformation.gameData.roundImageURLs[hostChoice];
+                break;
+            default:
+                int index = whatLoading - 1;
+                ulrToLoad = Common.roundInformation.gameData.roundImageURLs[voteWinners[index]];
+                break;
+        }
+       Common.getImageFromURL.loadImage(ulrToLoad, this.gameObject, "ShowWinnerImageLoaded");
+    }
+
+    public void ShowWinnerImageLoaded(Texture2D loadedImage)
+    {
+        Image toSetup;
+        switch (playerNumberLoading)
+        {
+            case 0:
+                toSetup = pickerChoiceImage;
+                break;
+            default:
+                toSetup = voteWinnerImage[playerNumberLoading - 1];
+                //ulrToLoad = Common.roundInformation.gameData.roundImageURLs[voteWinners[index]];
+                break;
+        }
+        Debug.Log("Setting image to " + playerNumberLoading.ToString());
+        Common.SetTexture2DToImage(toSetup, loadedImage);
+        loadingIMage = false;
+    }
+
+    Sprite FindSpriteFromElement(int counter)
+    {
+        Image img = Common.FindPickedImageFromChild(createdElements[counter]);
+        Sprite sprite = img.sprite;
+        return sprite;
     }
 
     IEnumerator LoadAllImages()
@@ -231,6 +342,7 @@ public class ShowWinnerMaster : MonoBehaviour {
     {
         loadingIMage = true;
         playerNumberLoading = playerNumber;
+
         string url = Common.roundInformation.GetPlayerURL(playerNumber);
         Debug.Log("Getting player image at pid " + playerNumber.ToString());
         SetElementName(playerNumber);
@@ -254,12 +366,13 @@ public class ShowWinnerMaster : MonoBehaviour {
         {
             Debug.Log("Found element next lets disable old ones");
             int pickedWinner = counter;
-            int oldPickedNumber = Common.roundInformation.gameData.winnerVotes[Common.playerInformation.playerNumber];
+            int oldPickedNumber = Common.playerInformation.myVote; //Common.roundInformation.gameData.winnerVotes[Common.playerInformation.playerNumber];
             if (oldPickedNumber != -1) //meaning the old is not -1, meaning it has been selected already.
             {
                 SetFavouritePickedGraphics(oldPickedNumber,false);
             }
-            Common.roundInformation.gameData.winnerVotes[Common.playerInformation.playerNumber] = pickedWinner;
+            //Common.roundInformation.gameData.winnerVotes[Common.playerInformation.playerNumber] = pickedWinner;
+            Common.playerInformation.myVote = pickedWinner;
             SetFavouritePickedGraphics(pickedWinner, true);
 
         }
@@ -284,6 +397,8 @@ public class ShowWinnerMaster : MonoBehaviour {
     void ImageLoaded(Texture2D loadedImage)
     {
         SetImageToElement(createdElements[playerNumberLoading], loadedImage);
+        createdElementsLoadedImagesURLS[playerNumberLoading]= Common.roundInformation.GetPlayerURL(playerNumberLoading);
+
         loadingIMage = false;
     }
 
@@ -292,6 +407,8 @@ public class ShowWinnerMaster : MonoBehaviour {
         Image img = Common.FindPickedImageFromChild(element);
         Common.SetTexture2DToImage(img, result);
     }
+
+
 
     void MoveCamera(int toWhere)
     {
